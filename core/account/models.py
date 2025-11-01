@@ -33,11 +33,25 @@ class CustomUserManager(BaseUserManager):
         create new instructor
         """
         extra_fields.setdefault("role", 'instructor')
-        if extra_fields.get("role") is not 'instructor':
+        if extra_fields.get("role") != 'instructor':
             raise ValueError(_("instructor user must have role=instructor"))
         if not email:
             raise ValueError(_("The email must be set"))
         return self.create_user(email, password, **extra_fields)
+    
+    def create_superuser(self, email, password, **extra_fields):
+        """
+        create new super user
+        """
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_staff", True)
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError(_("super user must have is_superuser=True"))
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError(_("super user must have is_staff=True"))
+        if not email:
+            raise ValueError(_("The email must be set"))
+        return self.create_student(email, password, **extra_fields)
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -52,6 +66,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True)
     is_active = models.BooleanField(default=True)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
+    is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
