@@ -82,7 +82,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Profile(models.Model):
-    user = models.ForeignKey("CustomUser", on_delete=models.CASCADE)
+    user = models.OneToOneField("CustomUser", on_delete=models.CASCADE)
     first_name = models.CharField(max_length=250, blank=True, null=True)
     last_name = models.CharField(max_length=250, blank=True, null=True)
     image = models.ImageField(blank=True, null=True)
