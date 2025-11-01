@@ -1,0 +1,22 @@
+services:
+
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - "7171:6379"
+    command: redis-server --save 60 1 --loglevel warning
+  backend:
+    build: .
+    container_name: backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./core/:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=django-insecure-r(j@s$i0y^9&#j06r7%fp^#ht6q4n*)jw9&)6lz!m^vts6cz*)
+      - DEBUG=True
+    depends_on:
+      - redis

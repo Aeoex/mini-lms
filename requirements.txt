@@ -1,0 +1,30 @@
+# general
+django >5, <=5.1.3
+python-decouple
+Pillow
+djangorestframework
+
+# third party
+markdown
+django-filter
+drf-yasg[validation]
+djangorestframework-simplejwt
+Faker
+django-cors-headers
+requests
+
+# deployment
+
+# refactoring
+black
+flake8
+
+# testing
+pytest
+pytest-django
+
+# background processing and caching
+celery
+django-celery-results
+Redis
+django-redis
