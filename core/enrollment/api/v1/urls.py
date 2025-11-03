@@ -8,8 +8,6 @@ app_name = "api-v1"
 
 router = DefaultRouter()
 
-router.register(r"courses", views.CourseModelViewSet, basename="courses")
-router.register(r'lessons', views.LessonModelViewSet, basename="lessons")
-
+router.register(r"enrollments", views.EnrollmentModelViewSet, basename="enrollments")
 
 urlpatterns = router.urls
