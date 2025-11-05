@@ -7,12 +7,33 @@ from rest_framework import status, generics
 from ...models import Quiz, Question, Choice, QuizAttempt
 from .serializers import QuizSerializer, QuestionSerializer, ChoiceSerializer, QuizAttemptSerializer
 from enrollment.models import Enrollment
-
+from core.permissions import IsEnrolledInCourse, IsInstructorOrAdmin
 
 class QuizModelViewSet(viewsets.ModelViewSet):
     serializer_class = QuizSerializer
-    queryset = Quiz.objects.all()
-    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            if user.is_staff:
+                return Quiz.objects.all()
+            return Quiz.objects.filter(lesson__course__enrollments__user_profile=user.profile).distinct()
+        return Quiz.objects.none()
+
+    def get_permissions(self):
+        """
+        Assign permissions dynamically depending on the action or request method.
+        """
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [IsEnrolledInCourse]
+        elif self.action in ["create", "update", "partial_update", "destroy"]:
+            permission_classes = [IsInstructorOrAdmin]
+        elif self.action == "submit":
+            permission_classes = [IsEnrolledInCourse]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     @action(detail=True, methods=["post"], url_path="submit")
     def submit_quiz(self, request, pk=None):
@@ -51,7 +72,7 @@ class QuizModelViewSet(viewsets.ModelViewSet):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsInstructorOrAdmin]
 
     def perform_create(self, serializer):
         quiz_id = self.request.data.get("quiz")
@@ -61,7 +82,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
 class ChoiceViewSet(viewsets.ModelViewSet):
     queryset = Choice.objects.all()
     serializer_class = ChoiceSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsInstructorOrAdmin]
 
     def perform_create(self, serializer):
         question_id = self.request.data.get("question")
@@ -71,7 +92,7 @@ class ChoiceViewSet(viewsets.ModelViewSet):
 
 class QuizAttemptListAPIView(generics.ListAPIView):
     serializer_class = QuizAttemptSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsEnrolledInCourse]
     queryset = QuizAttempt.objects.all()
 
     def get_queryset(self):
@@ -80,7 +101,7 @@ class QuizAttemptListAPIView(generics.ListAPIView):
 
 class QuizAttemptRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = QuizAttemptSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsEnrolledInCourse]
     queryset = QuizAttempt.objects.all()
 
     def get_queryset(self):

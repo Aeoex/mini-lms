@@ -3,6 +3,12 @@ from django.core.validators import MaxValueValidator
 
 # Create your models here.
 class Quiz(models.Model):
+    def is_user_enrolled(self, user):
+        """
+        Check if a user is enrolled in the course associated with this quiz.
+        """
+        return self.lesson.course.enrollments.filter(user_profile__user=user).exists()
+
     def __str__(self):
         return f"quiz for {self.lesson.title}" if hasattr(self, "lesson") and self.lesson else f"Quiz {self.id}"
 

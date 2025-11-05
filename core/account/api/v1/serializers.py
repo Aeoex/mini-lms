@@ -5,6 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.utils.translation import gettext_lazy as _
 
 from ...models import CustomUser, Profile
+from enrollment.models import Enrollment
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -61,7 +62,7 @@ class CustomChangePasswordSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source="user.email", read_only=True)
     role = serializers.CharField(source="user.role", read_only = True)
-
+    enrollments = serializers.SlugRelatedField(many=True, read_only=True, slug_field="course__title")
     class Meta:
         model = Profile
         fields = [
@@ -72,6 +73,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "image",
             "created_date",
-            "updated_date"
+            "updated_date",
+            "enrollments"
         ]
         read_only_fields = ["id", "created_date", "updated_date"]
